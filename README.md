@@ -41,47 +41,47 @@ called.
 
 This is a basic example:
 
-  Execution::init('ExecutionBasicErrorHandler');
-  Execution::cleanExit();
+    Execution::init('ExecutionBasicErrorHandler');
+    Execution::cleanExit();
 
 In line 4, we initialize the environment and in line 6, we signal to the
 environment that we have a clean exit. Otherwise, the script
 would have displayed the following message: ::
 
-  This application stopped in an unclean way.  Please contact the maintainer
-  of this system and explain him that the system doesn't work properly at the
-  moment.
+    This application stopped in an unclean way.  Please contact the maintainer
+    of this system and explain him that the system doesn't work properly at the
+    moment.
 
-  Have a nice day!
+    Have a nice day!
 
 This is simply the default message and can be customized. To do so, create a new
 class that implements the ExecutionErrorHandler interface. You will only
 have to implement one method: onError(). In the next example, we create such a
 class and implement a custom message:
 
-  class MyExecutionHandler implements ExecutionErrorHandler
-  {
-    public static function onError( Exception $e = NULL )
+    class MyExecutionHandler implements ExecutionErrorHandler
     {
-      if (!is_null($e))
+      public static function onError( Exception $e = NULL )
       {
-        $message = $e->getMessage();
-      }
-      else
-      {
-        $message = "Unclean Exit - Execution::cleanExit() was not called.";
-      }
+        if (!is_null($e))
+        {
+          $message = $e->getMessage();
+        }
+        else
+        {
+          $message = "Unclean Exit - Execution::cleanExit() was not called.";
+        }
 
-      echo "This application did not succesfully finish its request. ".
-          "The reason was:\n$message\n\n";
+        echo "This application did not succesfully finish its request. ".
+            "The reason was:\n$message\n\n";
+      }
     }
-  }
 
-  Execution::init('MyExecutionHandler');
+    Execution::init('MyExecutionHandler');
 
-  throw new Exception("Throwing an exception that will not be caught.");
+    throw new Exception("Throwing an exception that will not be caught.");
 
-  Execution::cleanExit();
+    Execution::cleanExit();
 
 In lines 4-20, we declare our handler class *MyExecutionHandler*, which
 implements the ExecutionErrorHandler interface. Using the onError method, on
@@ -127,21 +127,20 @@ Algorithms
 
 The following example shows how to utilize these classes: ::
 
-
-  class myExecutionHandler extends ExecutionBasicErrorHandler
-  {
-    public function onError($exception = NULL)
+    class myExecutionHandler extends ExecutionBasicErrorHandler
     {
-      echo "Error!\n";
-      parent::onError($exception);
+      public function onError($exception = NULL)
+      {
+        echo "Error!\n";
+        parent::onError($exception);
+      }
     }
-  }
 
-  Execution::init('myExecutionHandler');
+    Execution::init('myExecutionHandler');
 
-  ....
+    ....
 
-  Execution::cleanExit();
+    Execution::cleanExit();
 
 Tests
 -----
