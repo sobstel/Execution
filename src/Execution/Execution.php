@@ -102,7 +102,7 @@ class Execution
     }
 
     // Check if the passed classname actually implements the interface.
-    if (!in_array( 'ExecutionErrorHandler', class_implements($callbackClassName)))
+    if ($callbackClassName instanceof ExecutionErrorHandler)
     {
       throw new ExecutionWrongClassException($callbackClassName);
     }
