@@ -9,15 +9,18 @@
  * file that was distributed with this source code.
  */
 
+namespace Execution;
+
 /**
- * Thrown when the Execution framework was already initialized.
+ * Thrown when the Execution framework was not initialized when cleanExit()
+ * was called.
  * 
  * @package Execution
  */
-class ExecutionAlreadyInitializedException extends ExecutionException
+class NotInitializedException extends Exception
 {
     function __construct()
     {
-        parent::__construct("The Execution mechanism is already initialized.");
+        parent::__construct("The Execution mechanism was not initialized.");
     }
 }

@@ -9,24 +9,29 @@
  * file that was distributed with this source code.
  */
 
-require dirname(__FILE__).'/../src/autoload.php';
-require dirname(__FILE__).'/test_classes.php';
+namespace Execution\Tests;
+use Execution;
+
+require __DIR__.'/../../../src/Execution/ClassLoader.php';
+spl_autoload_register(array('Execution\ClassLoader', 'loadClass'));
+
+require __DIR__.'/test_classes.php';
 
 /**
  * @package Execution
  * @subpackage Tests
  */
-class ExecutionTest extends PHPUnit_Framework_TestCase
-{
+class ExecutionTest extends \PHPUnit_Framework_TestCase
+{  
   public function testCallbackExists()
   {
-    Execution::reset();
+    Execution\Execution::reset();
     try
     {
-      @Execution::init('ExecutionDoesNotExist');
+      @Execution\Execution::init('ExecutionDoesNotExist');
       $this->fail("Expected exception was not thrown");
     }
-    catch (ExecutionInvalidCallbackException $e)
+    catch (Execution\InvalidCallbackException $e)
     {
       $this->assertEquals("Class 'ExecutionDoesNotExist' does not exist.", $e->getMessage());
     }
@@ -34,14 +39,14 @@ class ExecutionTest extends PHPUnit_Framework_TestCase
 
   public function testAlreadyInitialized()
   {
-    Execution::reset();
+    Execution\Execution::reset();
     try
     {
-      Execution::init('ExecutionTest2');
-      Execution::init('ExecutionTest2');
+      Execution\Execution::init('Execution\Tests\ExecutionTest2');
+      Execution\Execution::init('Execution\Tests\ExecutionTest2');
       $this->fail("Expected exception was not thrown");
     }
-    catch (ExecutionAlreadyInitializedException $e)
+    catch (Execution\AlreadyInitializedException $e)
     {
       $this->assertEquals("The Execution mechanism is already initialized.", $e->getMessage());
     }
@@ -49,21 +54,21 @@ class ExecutionTest extends PHPUnit_Framework_TestCase
 
   public function testReset()
   {
-    Execution::reset();
-    Execution::init('ExecutionTest2');
-    Execution::reset();
-    Execution::init('ExecutionTest2');
+    Execution\Execution::reset();
+    Execution\Execution::init('ExecutionTest2');
+    Execution\Execution::reset();
+    Execution\Execution::init('ExecutionTest2');
   }
 
   public function testInvalidCallbackClass()
   {
-    Execution::reset();
+    Execution\Execution::reset();
     try
     {
-      Execution::init('ExecutionTest1');
+      Execution\Execution::init('ExecutionTest1');
       $this->fail("Expected exception was not thrown");
     }
-    catch (ExecutionWrongClassException $e)
+    catch (Execution\WrongClassException $e)
     {
       $this->assertEquals("The class 'ExecutionTest1' does not implement the 'ExecutionErrorHandler' interface.", $e->getMessage());
     }
@@ -71,9 +76,9 @@ class ExecutionTest extends PHPUnit_Framework_TestCase
 
   public function testCleanExitInitialized()
   {
-    Execution::reset();
-    Execution::init( 'ExecutionTest2' );
-    Execution::cleanExit();
+    Execution\Execution::reset();
+    Execution\Execution::init('ExecutionTest2');
+    Execution\Execution::cleanExit();
   }
 
   /**

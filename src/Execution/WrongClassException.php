@@ -9,18 +9,24 @@
  * file that was distributed with this source code.
  */
 
+namespace Execution;
+
 /**
- * Thrown when an non-existend class was passed as callback handler.
+ * Thrown when the passed classname does not represent a class that
+ * implements the ExecutionErrorHandler interface.
  * 
  * @package Execution
  */
-class ExecutionInvalidCallbackException extends ExecutionException
+class WrongClassException extends Exception
 {
     /**
+     * Constructs a new ExecutionWrongClassException.
+     *
      * @param string $callbackClassName
+     * @return void
      */
     function __construct($callbackClassName)
     {
-        parent::__construct("Class '{$callbackClassName}' does not exist.");
+        parent::__construct( "The class '{$callbackClassName}' does not implement the 'Execution\ErrorHandler' interface." );
     }
 }

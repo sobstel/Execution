@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+namespace Execution;
+
 /**
  * Class for handling fatal errors
  *
@@ -98,26 +100,26 @@ class Execution
     // Check if the passed classname actually exists
     if (!class_exists($callbackClassName, true))
     {
-      throw new ExecutionInvalidCallbackException($callbackClassName);
+      throw new InvalidCallbackException($callbackClassName);
     }
 
     // Check if the passed classname actually implements the interface.
     if ($callbackClassName instanceof ExecutionErrorHandler)
     {
-      throw new ExecutionWrongClassException($callbackClassName);
+      throw new WrongClassException($callbackClassName);
     }
 
     // Check if it was already initialized once
     if (self::$isInitialized == true)
     {
-      throw new ExecutionAlreadyInitializedException();
+      throw new AlreadyInitializedException();
     }
 
     // Install shutdown handler and exception handler
-    set_exception_handler(array('Execution', 'exceptionCallbackHandler'));
+    set_exception_handler(array('\Execution\Execution', 'exceptionCallbackHandler'));
     if (!self::$shutdownHandlerRegistered)
     {
-      register_shutdown_function( array( 'Execution', 'shutdownCallbackHandler' ) );
+      register_shutdown_function(array('\Execution\Execution', 'shutdownCallbackHandler'));
     }
     self::$callbackClassName = $callbackClassName;
     self::$isInitialized = true;
@@ -156,7 +158,7 @@ class Execution
    * {@link http://www.php.net/exit exit()} or
    * {@link http://www.php.net/die die()}.
    *
-   * @throws ExecutionNotInitializedException if the environment was not
+   * @throws Execution\NotInitializedException if the environment was not
    *         yet initialized.
    * @return void
    */
@@ -177,10 +179,10 @@ class Execution
    * This method has to be public otherwise PHP can not call it, but you
    * should never call this method yourself.
    *
-   * @param Exception $e
+   * @param \Exception $e
    * @return void
    */
-  static public function exceptionCallbackHandler(Exception $e)
+  static public function exceptionCallbackHandler(\Exception $e)
   {
     self::$cleanExit = true;
     call_user_func(array(self::$callbackClassName, 'onError'), $e);

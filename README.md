@@ -145,7 +145,7 @@ The following example shows how to utilize these classes: ::
 Tests
 -----
 
-Go to `tests` directory and run `phpunit ExecutionTest`.
+Simply run `phpunit tests`.
 
 Credits
 -------

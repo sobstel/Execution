@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+namespace Execution;
+
 /**
  * Interface for Execution callback handlers.
  *
@@ -19,7 +21,7 @@
  *
  * @package Execution
  */
-interface ExecutionErrorHandler
+interface ErrorHandler
 {
     /**
      * Processes an error situation
@@ -31,5 +33,5 @@ interface ExecutionErrorHandler
      * @param Exception $e 
      * @return void
      */
-    static public function onError(Exception $e = null);
+    static public function onError(\Exception $e = null);
 }

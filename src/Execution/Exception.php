@@ -9,23 +9,13 @@
  * file that was distributed with this source code.
  */
 
-/**
- * @package Execution
- * @subpackage Tests
- */
-class ExecutionTest1
-{
-}
+namespace Execution;
 
 /**
+ * General exception for use in {@link Execution} class.
+ *
  * @package Execution
- * @subpackage Tests
  */
-class ExecutionTest2 implements ExecutionErrorHandler
+abstract class Exception extends \Exception
 {
-  static public function onError( Exception $e = NULL )
-  {
-    echo "\nThe Execution succesfully detected an unclean exit.\n";
-    echo "Have a nice day!\n";
-  }
 }

@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+namespace Execution;
+
 /**
  * Simple implementation of a callback handler to use with Execution.
  *
@@ -18,7 +20,7 @@
  *
  * @package Execution
  */
-class ExecutionBasicErrorHandler implements ExecutionErrorHandler
+class BasicErrorHandler implements ErrorHandler
 {
     /**
      * Processes an error situation
@@ -35,7 +37,7 @@ class ExecutionBasicErrorHandler implements ExecutionErrorHandler
      *
      * @return void
      */
-    static public function onError(Exception $e = null)
+    static public function onError(\Exception $e = null)
     {
         echo <<<END
 This application stopped in an unclean way. Please contact the site
