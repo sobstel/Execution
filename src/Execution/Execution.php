@@ -15,7 +15,7 @@ namespace Execution;
 use Execution\Exception;
 
 /**
- * Class for handling fatal errors
+ * Class for handling fatal errors and uncaught exceptions
  *
  * This class allows you to invoke a handler whenever a fatal error occurs, or
  * when an uncatched exception happens.  You can specify which callback
@@ -24,22 +24,22 @@ use Execution\Exception;
  * Example:
  * <code>
  * <?php
- * class myExecutionHandler extends ExecutionBasicErrorHandler
+ * class myExecutionHandler extends Execution\ErrorHandler\BasicErrorHandler
  * {
- *     public static function onError( Exception $exception = null )
+ *     public static function onError(Exception $exception = null)
  *     {
  *         echo "Error!\n";
  *         // If you want, you can use the parent's onError method, but that
  *         // will only show a standard message.
- *         parent::onError( $exception );
+ *         parent::onError($exception);
  *     }
  * }
  * 
- * Execution::init( 'myExecutionHandler' );
+ * Execution\Execution::init('myExecutionHandler');
  * 
  * // ....
  * 
- * Execution::cleanExit();
+ * Execution\Execution::cleanExit();
  * ?>
  * </code>
  *
@@ -84,8 +84,9 @@ class Execution
      * With this method you initialize the Execution environment. You need
      * to specify a class name $callBackClassName that will be used to call the
      * onError() method on in case of an error. The class name that you
-     * pass should implement the ExecutionErrorHandler interface. This
-     * method takes care of registering the uncaught exception and shutdown
+     * pass should implement the Execution\ErrorHandler\ErrorHandlerInterface 
+     * interface. 
+     * This method takes care of registering the uncaught exception and shutdown
      * handlers.
      *
      * @throws Execution\Exception\InvalidCallbackException if an unknown 

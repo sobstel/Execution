@@ -10,7 +10,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Execution;
+namespace Execution\ErrorHandler;
 
 /**
  * Simple implementation of a callback handler to use with Execution.
@@ -21,7 +21,7 @@ namespace Execution;
  *
  * @package Execution
  */
-class BasicErrorHandler implements ErrorHandler
+class BasicErrorHandler implements ErrorHandlerInterface
 {
 
     /**
@@ -36,7 +36,6 @@ class BasicErrorHandler implements ErrorHandler
      * interface and use that as parameter to {@link Execution::init()}
      *
      * @param Exception $e
-     *
      * @return void
      */
     static public function onError(\Exception $e = null)
