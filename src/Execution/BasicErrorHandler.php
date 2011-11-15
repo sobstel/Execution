@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the Execution package.
  *
@@ -22,6 +23,7 @@ namespace Execution;
  */
 class BasicErrorHandler implements ErrorHandler
 {
+
     /**
      * Processes an error situation
      *
@@ -47,4 +49,5 @@ Have a nice day!
 
 END;
     }
+
 }

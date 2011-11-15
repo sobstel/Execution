@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the Execution package.
  *
@@ -23,6 +24,7 @@ namespace Execution;
  */
 interface ErrorHandler
 {
+
     /**
      * Processes an error situation
      *
