@@ -21,11 +21,11 @@ class InvalidCallbackException extends Exception
 {
 
     /**
-     * @param string $callbackClassName
+     * @param mixed $callback
      */
-    function __construct($callbackClassName)
+    function __construct($callback)
     {
-        parent::__construct("Class '{$callbackClassName}' does not exist.");
+        parent::__construct("Callback is not callable.");
     }
 
 }

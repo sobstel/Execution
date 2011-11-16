@@ -24,14 +24,11 @@ use Execution\Exception;
  * Example:
  * <code>
  * <?php
- * class myExecutionHandler extends Execution\ErrorHandler\BasicErrorHandler
+ * class myExecutionHandler
  * {
- *     public static function onError(Exception $exception = null)
+ *     public function __invoke(\Exception $exception = null)
  *     {
  *         echo "Error!\n";
- *         // If you want, you can use the parent's onError method, but that
- *         // will only show a standard message.
- *         parent::onError($exception);
  *     }
  * }
  * 
@@ -56,16 +53,15 @@ class Execution
     static private $isInitialized = false;
 
     /**
-     * Contains the name of the class that is going to be used to call the
-     * onError() static method on when an fatal error situation occurs.
+     * Contains the callback that is going to be called the when an error occurs.
      * @var string
      */
-    static private $callbackClassName = null;
+    static private $callback = null;
 
     /**
-     * Records whether we had a clean exit from the application or not. If it's
-     * false then the shutdownCallbackHandler() method will not call the
-     * Execution Handler's onError() method.
+     * Records whether we had a clean exit from the application or not. 
+     * If it's false then the shutdownCallbackHandler() method will not call 
+     * the callback.
      * @var bool
      */
     static private $cleanExit = false;
@@ -81,71 +77,41 @@ class Execution
     /**
      * Initializes the Execution environment.
      *
-     * With this method you initialize the Execution environment. You need
-     * to specify a class name $callBackClassName that will be used to call the
-     * onError() method on in case of an error. The class name that you
-     * pass should implement the Execution\ErrorHandler\ErrorHandlerInterface 
-     * interface. 
+     * You need to specify a callback $callBack that will be called in case of 
+     * an error.
+     * 
      * This method takes care of registering the uncaught exception and shutdown
      * handlers.
      *
      * @throws Execution\Exception\InvalidCallbackException if an unknown 
      *         callback class was passed.
-     * @throws Execution\Exception\WrongClassException if an invalid callback 
-     *         class was passed.
      * @throws Execution\Exception\AlreadyInitializedException if the environment
      *         was already initialized.
      *
-     * @param string $callbackClassName
+     * @param mixed $callback
      * @return void
+     * 
+     * @api
      */
-    static public function init($callbackClassName)
+    static public function init($callback)
     {
-        // Check if the passed classname actually exists
-        if (!class_exists($callbackClassName, true)) {
-            throw new Exception\InvalidCallbackException($callbackClassName);
+        if (!is_callable($callback)) {
+            throw new Exception\InvalidCallbackException($callback);
         }
 
-        // Check if the passed classname actually implements the interface.
-        if ($callbackClassName instanceof ExecutionErrorHandler) {
-            throw new Exception\WrongClassException($callbackClassName);
-        }
-
-        // Check if it was already initialized once
-        if (self::$isInitialized == true) {
+        if (self::$isInitialized) {
             throw new Exception\AlreadyInitializedException();
         }
 
-        // Install shutdown handler and exception handler
-        set_exception_handler(array('\Execution\Execution', 'exceptionCallbackHandler'));
+        set_exception_handler('\Execution\Execution::exceptionCallbackHandler');
         if (!self::$shutdownHandlerRegistered) {
-            register_shutdown_function(array('\Execution\Execution', 'shutdownCallbackHandler'));
+            register_shutdown_function('\Execution\Execution::shutdownCallbackHandler');
         }
-        self::$callbackClassName = $callbackClassName;
+
+        self::$callback = $callback;
         self::$isInitialized = true;
         self::$cleanExit = false;
         self::$shutdownHandlerRegistered = true;
-    }
-
-    /**
-     * Resets the Execution environment.
-     *
-     * With this function you reset the environment. Usually this method should
-     * not be used, but in the cases when you want to restart the environment
-     * this is the method to use. It also takes care of restoring the user
-     * defined uncaught exception handler, but it can not undo the registered
-     * shutdown handler as PHP doesn't provide that functionality.
-     *
-     * @return void
-     */
-    static public function reset()
-    {
-        if (self::$isInitialized) {
-            restore_exception_handler();
-        }
-        self::$callbackClassName = null;
-        self::$isInitialized = false;
-        self::$cleanExit = false;
     }
 
     /**
@@ -157,17 +123,33 @@ class Execution
      * {@link http://www.php.net/exit exit()} or
      * {@link http://www.php.net/die die()}.
      *
-     * @throws Execution\Exception\NotInitializedException if the environment 
-     *         was not yet initialized.
      * @return void
+     * 
+     * @api
      */
     static public function cleanExit()
     {
-        if (!self::$isInitialized) {
-            throw new Exception\NotInitializedException();
-        }
-
         self::$cleanExit = true;
+    }
+
+    /**
+     * Resets the Execution environment.
+     *
+     * Usually this method should not be used, but in the rare cases when you 
+     * want to restart the environment this is the method to use.
+     *
+     * @return void
+     * 
+     * @api
+     */
+    static public function reset()
+    {
+        if (self::$isInitialized) {
+            restore_exception_handler();
+        }
+        self::$isInitialized = false;
+        self::$callback = null;
+        self::$cleanExit = false;
     }
 
     /**
@@ -175,36 +157,32 @@ class Execution
      *
      * The Execution environment installs this method as handler for
      * uncaught exceptions and will be called when one is found.  This method's
-     * only function is to call the ::onError() static method of the error
-     * handler set with the init() method. It passes along the uncaught
-     * exception to this method.
-     *
-     * This method has to be public otherwise PHP can not call it, but you
-     * should never call this method yourself.
+     * only function is to call the callback set with the init() method. 
+     * It passes along the uncaught exception to this method.
      *
      * @param \Exception $e
      * @return void
      */
     static public function exceptionCallbackHandler(\Exception $e)
     {
-        self::$cleanExit = true;
-        call_user_func(array(self::$callbackClassName, 'onError'), $e);
+        self::cleanExit();
+        call_user_func(self::$callback, $e);
     }
 
     /**
-     * Shutdown handler
+     * Shutdown handler.
      *
      * The Execution environment installs this method as general shutdown handler.
-     * This method's only function is to call the ::onError() static method of
-     * the error handler set with the init() method.
+     * This method's only function is to call the callback set with the init() 
+     * method.
      *
      * @return void
      */
     static public function shutdownCallbackHandler()
     {
         if (!self::$cleanExit) {
-            self::$cleanExit = true;
-            call_user_func(array(self::$callbackClassName, 'onError'));
+            self::cleanExit();
+            call_user_func(self::$callback);
         }
     }
 

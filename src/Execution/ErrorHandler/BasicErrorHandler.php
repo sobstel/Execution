@@ -21,9 +21,14 @@ namespace Execution\ErrorHandler;
  *
  * @package Execution
  */
-class BasicErrorHandler implements ErrorHandlerInterface
+class BasicErrorHandler
 {
 
+    private $message = <<<END
+This application stopped in an unclean way. Please contact the site
+administrator to report the error.
+END;
+    
     /**
      * Processes an error situation
      *
@@ -38,15 +43,9 @@ class BasicErrorHandler implements ErrorHandlerInterface
      * @param Exception $e
      * @return void
      */
-    static public function onError(\Exception $e = null)
+    public function __invoke(\Exception $e = null)
     {
-        echo <<<END
-This application stopped in an unclean way. Please contact the site
-administrator to report the error.
-
-Have a nice day!
-
-END;
+        echo $this->message;
     }
 
 }
