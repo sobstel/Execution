@@ -1,110 +1,189 @@
 <?php
+
 /**
  * This file is part of the Execution package.
  *
  * (c) 2011, Przemek Sobstel (http://sobstel.org).
- * (c) 2005-2008, eZ Systems A.S.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Execution\Tests;
-use Execution;
 
-require __DIR__.'/../../../src/Execution/ClassLoader.php';
-spl_autoload_register(array('Execution\ClassLoader', 'loadClass'));
-
-require __DIR__.'/test_classes.php';
+use Execution\Execution;
+use Execution\Exception;
 
 /**
  * @package Execution
  * @subpackage Tests
  */
 class ExecutionTest extends \PHPUnit_Framework_TestCase
-{  
-  public function testCallbackExists()
-  {
-    Execution\Execution::reset();
-    try
+{
+
+    public function setUp()
     {
-      @Execution\Execution::init('ExecutionDoesNotExist');
-      $this->fail("Expected exception was not thrown");
+        Execution::reset();
     }
-    catch (Execution\InvalidCallbackException $e)
+
+    public function tearDown()
     {
-      $this->assertEquals("Class 'ExecutionDoesNotExist' does not exist.", $e->getMessage());
+        Execution::reset();
+        Execution::cleanExit();
     }
-  }
 
-  public function testAlreadyInitialized()
-  {
-    Execution\Execution::reset();
-    try
+    public function testCanResetEnvironment() {
+        $this->setPropertyValue('isInitialized', '_fake_');
+        $this->setPropertyValue('callback', '_fake_');
+        $this->setPropertyValue('cleanExit', '_fake_');
+       
+        Execution::reset();
+
+        $this->assertAttributeEquals(false, 'isInitialized', '\Execution\Execution');
+        $this->assertAttributeEquals(null, 'callback', '\Execution\Execution');
+        $this->assertAttributeEquals(false, 'cleanExit', '\Execution\Execution');        
+    }
+
+    /**
+     * @dataProvider invalidCallbacks
+     * @expectedException \Execution\Exception\InvalidCallbackException
+     */
+    public function testThrowsExceptionOnInvalidCallback($callback)
     {
-      Execution\Execution::init('Execution\Tests\ExecutionTest2');
-      Execution\Execution::init('Execution\Tests\ExecutionTest2');
-      $this->fail("Expected exception was not thrown");
+        Execution::init($callback);
     }
-    catch (Execution\AlreadyInitializedException $e)
+
+    public function invalidCallbacks()
     {
-      $this->assertEquals("The Execution mechanism is already initialized.", $e->getMessage());
+        return array(
+            array('fake_func'),
+            array('FakeClass::fakeMethod')
+        );
     }
-  }
 
-  public function testReset()
-  {
-    Execution\Execution::reset();
-    Execution\Execution::init('ExecutionTest2');
-    Execution\Execution::reset();
-    Execution\Execution::init('ExecutionTest2');
-  }
-
-  public function testInvalidCallbackClass()
-  {
-    Execution\Execution::reset();
-    try
+    private function callbackTest($callback)
     {
-      Execution\Execution::init('ExecutionTest1');
-      $this->fail("Expected exception was not thrown");
+        $exception_thrown = false;
+        try {
+            Execution::init($callback);
+        } catch (Exception\InvalidCallbackException $e) {
+            $exception_thrown = true;
+        }
+        $this->assertFalse($exception_thrown, 'Exception should not be thrown on valid callback');
     }
-    catch (Execution\WrongClassException $e)
+
+    public function testCallbackCanBeFunction()
     {
-      $this->assertEquals("The class 'ExecutionTest1' does not implement the 'ExecutionErrorHandler' interface.", $e->getMessage());
+        $this->callbackTest('Execution\Tests\Artifacts\some_func');
     }
-  }
 
-  public function testCleanExitInitialized()
-  {
-    Execution\Execution::reset();
-    Execution\Execution::init('ExecutionTest2');
-    Execution\Execution::cleanExit();
-  }
+    public function testCallbackCanBeClassMethod()
+    {
+        Execution::reset();
+        $this->callbackTest('\Execution\Tests\Artifacts\SomeClass::some_static_method');
+        
+        Execution::reset();
+        $this->callbackTest(array('\Execution\Tests\Artifacts\SomeClass', 'some_static_method'));
+        
+        Execution::reset();
+        $some_obj = new \Execution\Tests\Artifacts\SomeClass();
+        $this->callBackTest(array($some_obj, 'some_method'));
+    }
 
-  /**
-   * Unfortunately this test is unable to work, because when the uncaught
-   * exception would have been run, PHP aborts. So let's leave the test
-   * commented out!
-   *
-  public function testUncaughtException()
-  {
-    Execution::reset();
-    Execution::init( 'ExecutionBasicErrorHandler' );
-    throw new Exception();
-    Execution::reset();
-  }
-   */
+    public function testCallbackCanBeClosure()
+    {
+        $this->callbackTest(function(){});
+    }
 
-  /**
-   * This test would leave a warning when the unit test frameworks ends. As
-   * there is no other way of testing this, please leave the test commented
-   * out!
-   *
-  public function testUncleanExit()
-  {
-    Execution::reset();
-    Execution::init( 'ExecutionBasicErrorHandler' );
-  }
-   */
+    /**
+     * @expectedException \Execution\Exception\AlreadyInitializedException
+     */
+    public function testThrowsExceptionWhenInitializingAlreadyInitialized()
+    {
+        $this->setPropertyValue('isInitialized', true);
+        
+        Execution::init(function(){});
+    }
 
+    public function testRegistersCustomExceptionHandler()
+    {
+        Execution::init(function(){});
+        
+        $org_exception_handler = set_exception_handler(function(){});
+        $this->assertEquals($org_exception_handler, '\Execution\Execution::exceptionCallbackHandler');
+        
+        restore_exception_handler();
+    }
+    
+    public function testCanInitialize()
+    {
+        $closure = function(){};
+
+        Execution::init($closure);
+
+        $this->assertEquals($closure, $this->getPropertyValue('callback'));
+        $this->assertEquals(true, $this->getPropertyValue('isInitialized'));
+        $this->assertEquals(false, $this->getPropertyValue('cleanExit'));
+        $this->assertEquals(true, $this->getPropertyValue('shutdownHandlerRegistered'));
+    }
+
+    public function testCanCleanExit() {
+        $this->setPropertyValue('cleanExit', false);        
+        Execution::cleanExit();
+        $this->assertEquals(true, $this->getPropertyValue('cleanExit'));
+    }
+
+    public function testCallbackCalledByExceptionHandler()
+    {
+        $obj = new Artifacts\CalledClass();
+        Execution::init($obj);
+        
+        Execution::exceptionCallbackHandler(new \Exception());
+        
+        $this->assertEquals(true, $obj->called);
+        $this->assertEquals(true, $obj->exception_passed);
+    }
+    
+    public function testCallbackCalledByShutdownHandler()
+    {
+        $obj = new Artifacts\CalledClass();
+        Execution::init($obj);
+        
+        Execution::shutdownCallbackHandler(new \Exception());
+        
+        $this->assertEquals(true, $obj->called);
+        $this->assertEquals(false, $obj->exception_passed);
+        $this->assertEquals(true, $this->getPropertyValue('cleanExit'));
+    }
+
+    public function testCallbackNotCalledByShutdownHandlerWhenCleanExit()
+    {
+        $obj = new Artifacts\CalledClass();
+        Execution::init($obj);        
+        Execution::cleanExit();        
+        Execution::shutdownCallbackHandler(new \Exception());
+        
+        $this->assertEquals(false, $obj->called);
+        $this->assertEquals(false, $obj->exception_passed);
+        $this->assertEquals(true, $this->getPropertyValue('cleanExit'));
+    }
+
+    private function makePropertyAccessible($name) {
+        $ref_prop = new \ReflectionProperty('\Execution\Execution', $name);
+        $ref_prop->setAccessible(true);
+        return $ref_prop;
+    }
+    
+    private function setPropertyValue($name, $value)
+    {
+        $ref_prop = $this->makePropertyAccessible($name);
+        $ref_prop->setValue('\Execution\Execution', $value);
+        return $ref_prop;
+    }
+
+    private function getPropertyValue($name)
+    {
+        $ref_prop = $this->makePropertyAccessible($name);
+        return $ref_prop->getValue('\Execution\Execution', $name);
+    }
 }
