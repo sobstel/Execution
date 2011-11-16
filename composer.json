@@ -4,6 +4,7 @@
     "description": "Handles PHP fatal errors and uncaught exceptions.",
     "keywords": ["errors","exceptions"],
     "homepage": "http://github.com/sobstel/Execution",
+    "version": "1.0.0RC1",
     "license": "New BSD",
     "authors": [
         {
