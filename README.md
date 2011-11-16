@@ -138,7 +138,8 @@ Frederik Holljen, Kore Nordmann, Derick Rethans, Vadym Savchuk, Tobias Schlitt
 and Alexandru Stanoi.
 
 Major improvements in comparison with original ezcComponent:
-- you can pass any callback, including closures and invokable objects (it is if 
-  they have __invoke() method implemented),
-- slimed and simplified,
-- rewritten tests (100% code coverage).
+
+  - you can pass any callback, including closures and invokable objects (it is 
+    if they have __invoke() method implemented),
+  - slimed and simplified,
+  - rewritten tests (100% code coverage).
