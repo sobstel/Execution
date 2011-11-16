@@ -92,7 +92,7 @@ class and implement a custom message:
       }
     }
 
-    Execution::init('MyExecutionHandler');
+    Execution::init(new MyExecutionHandler());
 
     throw new Exception("Throwing an exception that will not be caught.");
 
