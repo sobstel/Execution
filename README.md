@@ -39,11 +39,12 @@ compatible autoloader.
 
     // symfony2 autoloader
     require_once 'vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-    $loader = new \Symfony\Component\ClassLoader\UniversalClassLoader();
-    $;oader->registerNamespaces(array(
+    use new Symfony\Component\ClassLoader;
+    $loader = new ClassLoader\UniversalClassLoader();
+    $loader->registerNamespaces(array(
         'Execution' => 'vendor/Execution/src',
     ));
-    $classLoader->register();
+    $loader->register();
 
 Usage
 -----
