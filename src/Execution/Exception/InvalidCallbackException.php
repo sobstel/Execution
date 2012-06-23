@@ -1,31 +1,25 @@
 <?php
-
 /**
- * This file is part of the Execution package.
+ * Execution
  *
- * (c) 2011, Przemek Sobstel (http://sobstel.org).
- * (c) 2005-2008, eZ Systems A.S.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * @author Przemek Sobstel (http://sobstel.org)
+ * @license The MIT License
  */
 
 namespace Execution\Exception;
 
 /**
- * Thrown when an non-existend class was passed as callback handler.
+ * Thrown when an invalid callback was passed.
  * 
  * @package Execution
  */
-class InvalidCallbackException extends Exception
-{
+class InvalidCallbackException extends Exception {
 
-    /**
-     * @param mixed $callback
-     */
-    function __construct($callback)
-    {
-        parent::__construct("Callback is not callable.");
-    }
+  /**
+   * @param mixed $callback
+   */
+  function __construct($callback) {
+    parent::__construct("Callback is not callable.");
+  }
 
 }

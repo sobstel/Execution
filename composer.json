@@ -1,11 +1,11 @@
 {
     "name": "sobstel/Execution",
     "type": "library",
-    "description": "Handles PHP fatal errors and uncaught exceptions.",
+    "description": "Handles unrecoverable fatal errors.",
     "keywords": ["errors","exceptions"],
     "homepage": "http://github.com/sobstel/Execution",
-    "version": "1.0.0",
-    "license": "New BSD",
+    "version": "2.0.0",
+    "license": "MIT",
     "authors": [
         {
             "name": "Przemek Sobstel",

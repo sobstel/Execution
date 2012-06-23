@@ -1,9 +1,4 @@
 <?php
-require_once __DIR__.'/../src/Execution/ClassLoader/ClassLoader.php';
+require_once __DIR__.'/../src/Execution/Execution.php';
 
-use Execution\ClassLoader\ClassLoader;
-
-$loader = new ClassLoader();
-$loader->register();
-
-require_once __DIR__.'/test_artifacts.php';
+// require_once __DIR__.'/test_artifacts.php';

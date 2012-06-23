@@ -1,13 +1,9 @@
 <?php
-
 /**
- * This file is part of the Execution package.
+ * Execution
  *
- * (c) 2011, Przemek Sobstel (http://sobstel.org).
- * (c) 2005-2008, eZ Systems A.S.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * @author Przemek Sobstel (http://sobstel.org)
+ * @license The MIT License
  */
 
 namespace Execution\ErrorHandler;
@@ -16,36 +12,28 @@ namespace Execution\ErrorHandler;
  * Simple implementation of a callback handler to use with Execution.
  *
  * This is a very simple callback handler which only issues a simple message.
- * Of course in applications you will need to either extend this class, or just
- * implement the ExecutionErrorHandler interface.
  *
  * @package Execution
  */
-class BasicErrorHandler
-{
+class BasicErrorHandler {
 
     private $message = <<<END
-This application stopped in an unclean way. Please contact the site
+This application stopped unexpectedly. Please contact the site
 administrator to report the error.
 END;
-    
-    /**
-     * Processes an error situation
-     *
-     * This method is called by the Execution environment whenever an error
-     * situation (uncaught exception or fatal error) happens.  It accepts one
-     * default parameter in case there was an uncaught exception.
-     *
-     * This class just serves as an example, for your own application you
-     * should write your own class that implements the ExecutionErrorHandler
-     * interface and use that as parameter to {@link Execution::init()}
-     *
-     * @param Exception $e
-     * @return void
-     */
-    public function __invoke(\Exception $e = null)
-    {
-        echo $this->message;
-    }
+
+  /**
+   * Processes an error situation
+   *
+   * This method is called by the Execution environment whenever fatal error
+   * happens. It accepts one default parameter (array), which is output of
+   * error_get_last() function result.
+   *
+   * @param array
+   * @return void
+   */
+  public function __invoke($error) {
+    echo $this->message;
+  }
 
 }
